@@ -1,0 +1,38 @@
+# ---- Compiled objects / libraries ----
+*.o
+*.lo
+*.la
+*.a
+*.so
+*.so.*
+*.dylib
+*.dll
+
+# ---- Build directories (out-of-source builds only) ----
+build/
+
+# ---- Autotools generated files (only relevant if ever configured in-place) ----
+config.log
+config.status
+config.cache
+autom4te.cache/
+libtool
+
+# ---- Python cache ----
+__pycache__/
+*.pyc
+
+# ---- PDF data sets ----
+*.dat
+!pdfsets/**/*.dat
+
+# ---- Tarballs ----
+*.tar.gz
+
+# ---- Editor/OS cruft ----
+.DS_Store
+*.swp
+*~
+
+# ---- Backup files ----
+*.orig
