@@ -1,0 +1,94 @@
+#
+# simple pythia6 makefile
+#
+UNAME = $(shell uname)
+ifeq "$(UNAME)" "Linux"
+    AR=ar
+    F77=gfortran
+    FFLAG= -O -fno-second-underscore -fPIC -m64
+    CPP = gcc -E 
+    CPPFLG= -C -P
+endif
+ifeq "$(UNAME)" "Darwin"
+    AR=ar
+    F77=gfortran
+    FFLAG= -O -fno-second-underscore -fPIC -m64
+    CPP = cc -E
+    CPPFLG= -C -P
+endif
+
+LIB = ./lib
+SRC = ./PYTHIA-6.4.28-eicmod
+SRC2 = .
+SRC3 = ./tpythia6_build
+INC = ./include
+
+CPPFLGS = $(CPPFLG) -D$(UNAME)
+
+FOBJS = $(patsubst %.f,%.o,$(wildcard $(SRC)/*.f))            $(patsubst %.F,%.o,$(wildcard $(SRC)/*.F))
+
+FOBJS2 = $(SRC2)/gmc_random.o $(SRC2)/pyMaineRHIC_v2.o $(SRC2)/pyth_xsec.o $(SRC2)/pythia_radgen_extras.o $(SRC2)/radgen.o $(SRC2)/radgen_event.o $(SRC2)/radgen_init.o
+
+FOBJS3 = $(SRC3)/main.o $(SRC3)/pythia6_common_address.o $(SRC3)/tpythia6_called_from_cc.o
+
+# FOBJS2ALL = $(patsubst %.f,%.o,$(wildcard $(SRC2)/*.f))            $(patsubst %.F,%.o,$(wildcard $(SRC2)/*.F))	
+# FOBJS2 = $(filter-out pyMaineRHIC,$(FOBJS2ALL))
+
+# FOBJSALL = $(patsubst %.f,%.o,$(wildcard *.f))            $(patsubst %.F,%.o,$(wildcard *.F))
+
+# # remove the "pdfdum.o" as we don't want that going into the .a library
+# FOBJS = $(filter-out pdfdum.o,$(FOBJSALL))
+
+#------------------------------------------
+
+
+all: $(LIB)/libpythia6-eicmod.a $(LIB)/pydata.o pythiaeRHIC $(LIB)/libPythia6.dylib
+
+$(LIB)/libpythia6-eicmod.a: $(FOBJS) 
+	$(AR) -urs $(LIB)/libpythia6-eicmod.a $(FOBJS) 
+
+$(LIB)/pydata.o: $(SRC)/pydata.o
+	cp -p $(SRC)/pydata.o $(LIB)/
+
+
+pythiaeRHIC: $(FOBJS2) $(LIB)/libpythia6-eicmod.a
+	$(F77) $(FFLAG) -I$(INC) $(FOBJS2) -o pythiaeRHIC \
+	   -L$(LIB) -lpythia6-eicmod \
+	   -L${CERN}/lib -lmathlib -lkernlib -lpacklib -ldl -lm \
+	   -L${LHAPDF5}/lib -lLHAPDF
+
+
+$(LIB)/libPythia6.dylib: $(FOBJS3) $(FOBJS) $(FOBJS2)
+	gcc -m64 -dynamiclib -flat_namespace -single_module -undefined dynamic_lookup \
+	      -Wl,-no_compact_unwind \
+	      -install_name libPythia6.dylib -o $(LIB)/libPythia6.dylib \
+	      $(FOBJS3) $(FOBJS) $(FOBJS2)
+
+
+# $(LIB)/pdfdum.o: pdfdum.o
+# 	cp -p pdfdum.o $(LIB)/pdfdum.o
+
+clean:
+	rm -f ./pythiaeRHIC
+	rm -f $(FOBJS)
+	rm -f $(FOBJS2)
+	rm -f $(FOBJS3)
+
+veryclean:
+	rm -f ./pythiaeRHIC
+	rm -f $(FOBJS)
+	rm -f $(FOBJS2)
+	rm -f $(FOBJS3)
+	rm -f $(LIB)/*.o $(LIB)/*.a $(LIB)/*.dylib $(LIB)/*.so 
+
+#------------------------------------------
+
+.SUFFIXES : .o .f .F
+
+.f.o:
+	$(F77) $(FFLAG) -I$(INC) -c $< -o $@
+
+.F.o: 
+	$(F77) $(FFLAG)  -I$(INC) -c $< -o $@
+
+

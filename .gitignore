@@ -36,3 +36,6 @@ __pycache__/
 
 # ---- Backup files ----
 *.orig
+
+# ---- Pre-generated Doxygen documentation (regenerable) ----
+LHAPDF-6.5.5/doc/doxygen/

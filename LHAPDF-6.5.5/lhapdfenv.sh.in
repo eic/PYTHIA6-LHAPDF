@@ -1,0 +1,9 @@
+# convenience variables that must exist
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+
+export PATH="$exec_prefix/bin":$PATH
+export PYTHONPATH="@LHAPDF_PYTHONPATH@:$PYTHONPATH"
+export @LIBPATHVARNAME@="@libdir@:$@LIBPATHVARNAME@"
+export LHAPDF_DATA_PATH="$prefix/share/LHAPDF/"
+

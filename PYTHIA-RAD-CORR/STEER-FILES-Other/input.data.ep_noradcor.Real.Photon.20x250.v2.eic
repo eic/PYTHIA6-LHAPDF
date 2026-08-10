@@ -1,0 +1,22 @@
+pythia.ep.20x250.5Mevents.1.RadCor=0.Q2-0.-10.txt ! output file name
+11                ! lepton beam type
+250, 20           ! proton and electron beam energy
+5000,100       ! Number of events 
+1e-09, 0.99       ! xmin and xmax
+1e-09,1.00        ! ymin and ymax 
+1e-09,10       ! Q2min and Q2max 
+F2PY,1998         ! F2-Model, R-Parametrisation
+0                 ! switch for rad corrections; 0:no, 1:yes, 2:gen.lookup table 
+1                 ! Pythia-Model = 0 standard GVMD generation in Pythia-x and Q2; = 1 GVMD model with generation in y and Q2 as for radgen
+1,1               ! A-Tar and Z-Tar
+1,1               ! nuclear pdf parameter1: nucleon mass number A, charge number Z
+201               ! nuclear pdf parameter2: correction order x*100+y x= 1:LO, 2:NLO y:error set
+! PMAS(4,1)=1.27    ! charm mass
+MSEL=0
+MSTP(14)=1
+MSUB(11)=1
+MSUB(12)=1
+MSUB(13)=1
+MSUB(28)=1
+MSUB(53)=1
+MSUB(68)=1

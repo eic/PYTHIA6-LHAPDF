@@ -1,0 +1,69 @@
+#! /usr/bin/env bash
+## -*- sh -*-
+## @configure_input@
+
+## These variables need to exist
+## Note no use of $DESTDIR... we ignore it so that destdir can be used
+## for temp installs later copied to /
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+datarootdir=@datarootdir@
+
+if [[ $# -eq 0 || -n $( echo $* | grep -E -- "--help|-h" ) ]]; then
+    echo "lhapdf-config: configuration tool for the LHAPDF"
+    echo "               parton density function evolution library"
+    echo "               http://projects.hepforge.org/lhapdf/"
+    echo
+    echo "Usage: lhapdf-config [options]"
+    echo "Options:"
+    echo "  --help | -h   : show this help message"
+    echo "  --prefix      : show the installation prefix (cf. autoconf)"
+    echo "  --incdir      : show the path to the LHAPDF C++ header directory"
+    echo "  --libdir      : show the path to the LHAPDF library directory"
+    echo "  --datadir     : show the path to the LHAPDF data directory"
+    echo "  --pythonpath  : show the path(s) to the directory containing YODA's Python package"
+    echo
+    echo "  --cxx         : get compiler (including -std=c++11 flag or equiv)"
+    echo "  --cflags      : get compiler flags (aka --cppflags|--cxxflags)"
+    echo "  --libs        : get linker flags (aka --ldflags)"
+    echo
+    echo "  --version     : return LHAPDF release version number"
+    if [[ $# -eq 0 ]]; then exit 1; else exit 0; fi
+fi
+
+OUT=""
+
+## "Atomic" build info
+tmp=$( echo "$*" | grep -E -- '--\<prefix\>')
+test -n "$tmp" && OUT="$OUT @prefix@"
+
+tmp=$( echo "$*" | grep -E -- '--\<incdir\>')
+test -n "$tmp" && OUT="$OUT @includedir@"
+
+tmp=$( echo "$*" | grep -E -- '--\<cxx\>')
+test -n "$tmp" && OUT="$OUT @LHAPDF_CXX@"
+
+tmp=$( echo "$*" | grep -E -- '--\<libdir\>')
+test -n "$tmp" && OUT="$OUT @libdir@"
+
+tmp=$( echo "$*" | grep -E -- '--\<datadir\>|--\<datarootdir\>')
+test -n "$tmp" && OUT="$OUT @datadir@/@PACKAGE_TARNAME@"
+
+tmp=$( echo "$*" | grep -E -- '--\<pythonpath|pydir\>')
+test -n "$tmp" && OUT="$OUT @LHAPDF_PYTHONPATH@"
+
+
+## "Pre-rolled" build info
+tmp=$( echo "$*" | grep -E -- '--\<cflags|cppflags|cxxflags\>')
+test -n "$tmp" && OUT="$OUT @YAML_CPP_CXXFLAGS@ @LHAPDF_CXXFLAGS@ -I@includedir@"
+
+tmp=$( echo "$*" | grep -E -- '--\<libs|ldflags\>')
+test -n "$tmp" && OUT="$OUT @YAML_CPP_LDFLAGS@ -L@libdir@ -lLHAPDF"
+
+
+## Version
+tmp=$( echo "$*" | grep -E -- '--\<version\>')
+test -n "$tmp" && echo @PACKAGE_VERSION@ && exit 0
+
+
+echo $OUT
