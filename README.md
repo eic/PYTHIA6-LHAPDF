@@ -29,6 +29,9 @@ PYTHIA6-LHAPDF/
 ├── LHAPDF-6.5.5/        # LHAPDF source, patched in LHAGlue for the nPDF fix (see below)
 ├── pdfsets/             # A few bundled PDF sets for quick testing (see below)
 ├── STEERING/            # Example input cards
+├── env/
+│   └── lhapdf-env.sh    # sets up PATH/LD_LIBRARY_PATH/LHAPDF_DATA_PATH after building
+├── install-lhapdf/      # LHAPDF build output (git-ignored, created when you build)
 └── .gitignore
 ```
 
@@ -43,43 +46,56 @@ PYTHIA6-LHAPDF/
 
 ---
 
+## Environment setup
+
+This project is built and run inside **`eic-shell`**, the containerized EIC software environment.
+
+```bash
+eic-shell
+```
+
+> **Note:** even if your default login shell is `tcsh`, `eic-shell` runs `bash` internally. Verify with `ps -p $$ -o comm=` if unsure. All commands below assume bash, run from inside `eic-shell`.
+
+---
+
 ## 1. Building LHAPDF
 
 LHAPDF uses an Autotools build system. **Always build out-of-source** — never run `./configure` directly inside `LHAPDF-6.5.5/`. This keeps the tracked source tree clean.
 
 ```bash
 cd LHAPDF-6.5.5
-mkdir -p ../build-lhapdf
+mkdir -p build-lhapdf install-lhapdf
 cd ../build-lhapdf
 
-../LHAPDF-6.5.5/configure --prefix=/path/to/install/lhapdf
+../LHAPDF-6.5.5/configure --prefix=`readlink -f ../install-lhapdf`
 make -j4
 make install
 ```
+### Loading the environment
 
-Replace `/path/to/install/lhapdf` with wherever you want the built library installed (e.g. `$HOME/local/lhapdf`).
-
-After installing, make LHAPDF discoverable:
+Once built, source the environment script from the repo root:
 
 ```bash
-export PATH=/path/to/install/lhapdf/bin:$PATH
-export LD_LIBRARY_PATH=/path/to/install/lhapdf/lib:$LD_LIBRARY_PATH
+source env/lhapdf-env.sh
+```
+
+This works out of the box for anyone who clones the repo and follows the build step above exactly — no path editing required.
+
+Verify it worked:
+```bash
+lhapdf-config --datadir
+lhapdf list --installed
 ```
 
 ### PDF sets
 
-A few PDF sets are bundled directly in [`pdfsets/`](./pdfsets) for convenience. Point LHAPDF at them with:
-
-```bash
-export LHAPDF_DATA_PATH=$LHAPDF_DATA_PATH:/path/to/repo/pdfsets
-```
+A few PDF sets are bundled directly in [`pdfsets/`](./pdfsets) for convenience.
 
 To install additional PDF sets:
 
 ```bash
 lhapdf install <pdf-set-name>
 ```
-
 See the [LHAPDF PDF set list](https://lhapdf.hepforge.org/pdfsets.html) for available sets.
 
 ---
@@ -91,7 +107,7 @@ cd PYTHIA-RAD-CORR
 mkdir -p build
 cd build
 
-cmake .. -DLHAPDF_ROOT=/path/to/install/lhapdf
+cmake .. -DLHAPDF_ROOT=`readlink -f ../../install-lhapdf`
 make -j4
 ```
 

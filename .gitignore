@@ -39,3 +39,8 @@ __pycache__/
 
 # ---- Pre-generated Doxygen documentation (regenerable) ----
 LHAPDF-6.5.5/doc/doxygen/
+
+# ---- Local LHAPDF install (standardized location, built locally) ----
+install-lhapdf/
+build-lhapdf/
+.nfs*
