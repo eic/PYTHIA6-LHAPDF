@@ -29,9 +29,9 @@ PYTHIA6-LHAPDF/
 ├── LHAPDF-6.5.5/        # LHAPDF source, patched in LHAGlue for the nPDF fix (see below)
 ├── pdfsets/             # A few bundled PDF sets for quick testing (see below)
 ├── STEERING/            # Example input cards
-├── env/
-│   └── lhapdf-env.sh    # sets up PATH/LD_LIBRARY_PATH/LHAPDF_DATA_PATH after building
 ├── install-lhapdf/      # LHAPDF build output (git-ignored, created when you build)
+├── scripts/      # general setup scripts
+│   └── lhapdf-env.sh    # sets up PATH/LD_LIBRARY_PATH/LHAPDF_DATA_PATH (required everytime you enter eic-shell)
 └── .gitignore
 ```
 
@@ -60,31 +60,52 @@ eic-shell
 
 ## 1. Building LHAPDF
 
+Before building (only needed once, right after cloning):
+
+```bash
+bash scripts/fix-timestamps.sh
+```
+
 LHAPDF uses an Autotools build system. **Always build out-of-source** — never run `./configure` directly inside `LHAPDF-6.5.5/`. This keeps the tracked source tree clean.
 
 ```bash
 mkdir -p build-lhapdf install-lhapdf
 cd build-lhapdf
 
-../LHAPDF-6.5.5/configure --prefix=`readlink -f ../install-lhapdf`
-make -j4
-make install
+../LHAPDF-6.5.5/configure --prefix=`readlink -f ../install-lhapdf` --disable-python
 ```
+
+> Python bindings are disabled since they're not needed for this project's
+> C++/Fortran workflow, and the pre-generated Python wrapper has a known
+> path issue with out-of-source builds.
+
+```bash
+make -C src -j4
+make -C src install
+make -C include install
+make -C bin install
+
+mkdir -p ../install-lhapdf/share/LHAPDF
+cp ../LHAPDF-6.5.5/pdfsets.index ../install-lhapdf/share/LHAPDF/
+```
+
+> Only src/include/bin are built and installed — examples and tests are
+> skipped since they're not needed here, and have a known out-of-source
+> build issue with generated headers.
+
 ### Loading the environment
 
 Once built, source the environment script from the repo root:
 
 ```bash
-source env/lhapdf-env.sh
+source scripts/lhapdf-env.sh
 ```
-
-This works out of the box for anyone who clones the repo and follows the build step above exactly — no path editing required.
-
 Verify it worked:
 ```bash
 lhapdf-config --datadir
 lhapdf list --installed
 ```
+This works out of the box for anyone who clones the repo and follows the build step above exactly — no path editing required.
 
 ### PDF sets
 
@@ -103,8 +124,8 @@ See the [LHAPDF PDF set list](https://lhapdf.hepforge.org/pdfsets.html) for avai
 
 ```bash
 cd PYTHIA-RAD-CORR
-mkdir -p build
-cd build
+mkdir -p build-pythia
+cd build-pythia
 
 cmake .. -DLHAPDF_ROOT=`readlink -f ../../install-lhapdf`
 make -j4
