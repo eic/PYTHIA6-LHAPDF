@@ -79,6 +79,8 @@ make -C bin install
 mkdir -p ../install-lhapdf/share/LHAPDF
 cp ../LHAPDF-6.5.5/pdfsets.index ../install-lhapdf/share/LHAPDF/
 cp ../LHAPDF-6.5.5/lhapdf.conf ../install-lhapdf/share/LHAPDF/
+
+cd ..
 ```
 
 > Only src/include/bin are built and installed — examples and tests are
@@ -127,7 +129,7 @@ The build output (executables, object files) lands in `build/` and is not tracke
 
 Verify it worked, from build/:
 ```bash
-././pythia6-eic < ../../STEERING/card_test_eAg
+./pythia6-eic < ../../STEERING/card_test_eAg
 ```
 ---
 

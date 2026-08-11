@@ -1,4 +1,4 @@
-eAg_9x100_EPPS16_0.txt ! output file name
+eAg_test.txt ! output file name
 11                ! lepton beam type
 100, 9          ! proton and electron beam energy
 10,10           ! Number of events 
