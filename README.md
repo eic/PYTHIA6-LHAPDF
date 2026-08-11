@@ -63,9 +63,8 @@ eic-shell
 LHAPDF uses an Autotools build system. **Always build out-of-source** — never run `./configure` directly inside `LHAPDF-6.5.5/`. This keeps the tracked source tree clean.
 
 ```bash
-cd LHAPDF-6.5.5
 mkdir -p build-lhapdf install-lhapdf
-cd ../build-lhapdf
+cd build-lhapdf
 
 ../LHAPDF-6.5.5/configure --prefix=`readlink -f ../install-lhapdf`
 make -j4
