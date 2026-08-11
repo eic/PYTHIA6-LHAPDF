@@ -19,3 +19,7 @@ export LHAPDF_DATA_PATH="$LHAPDF/share/LHAPDF:$REPO_ROOT/pdfsets"
 export PATH="$LHAPDF/bin:$PATH"
 
 echo "LHAPDF environment loaded from: $LHAPDF"
+
+#Set path to cernlib
+export CERN_ROOT=/cvmfs/eic.opensciencegrid.org/gcc-8.3/opt/fun4all/core/cern64/pro
+echo "CERNLIB enenvironment loaded from: $CERN_ROOT"

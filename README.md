@@ -30,19 +30,10 @@ PYTHIA6-LHAPDF/
 ├── pdfsets/             # A few bundled PDF sets for quick testing (see below)
 ├── STEERING/            # Example input cards
 ├── install-lhapdf/      # LHAPDF build output (git-ignored, created when you build)
-├── scripts/      # general setup scripts
-│   └── lhapdf-env.sh    # sets up PATH/LD_LIBRARY_PATH/LHAPDF_DATA_PATH (required everytime you enter eic-shell)
+├── scripts/             # general setup scripts
+│   └── load-env.sh      # sets important paths (*required everytime you enter eic-shell*)
 └── .gitignore
 ```
-
----
-
-## Prerequisites
-
-- CMake ≥ 3.x
-- A Fortran compiler (gfortran) and C++ compiler
-- Autotools (`autoconf`, `automake`, `libtool`) — only needed if reconfiguring LHAPDF
-- Python 3 (optional, for LHAPDF's Python wrapper)
 
 ---
 
@@ -87,18 +78,20 @@ make -C bin install
 
 mkdir -p ../install-lhapdf/share/LHAPDF
 cp ../LHAPDF-6.5.5/pdfsets.index ../install-lhapdf/share/LHAPDF/
+cp ../LHAPDF-6.5.5/lhapdf.conf ../install-lhapdf/share/LHAPDF/
 ```
 
 > Only src/include/bin are built and installed — examples and tests are
 > skipped since they're not needed here, and have a known out-of-source
 > build issue with generated headers.
+> PDFs important information is copyed to relevant directory
 
 ### Loading the environment
 
 Once built, source the environment script from the repo root:
 
 ```bash
-source scripts/lhapdf-env.sh
+source scripts/load-env.sh
 ```
 Verify it worked:
 ```bash
@@ -124,17 +117,18 @@ See the [LHAPDF PDF set list](https://lhapdf.hepforge.org/pdfsets.html) for avai
 
 ```bash
 cd PYTHIA-RAD-CORR
-mkdir -p build-pythia
-cd build-pythia
+mkdir -p build
+cd build
 
-cmake .. -DLHAPDF_ROOT=`readlink -f ../../install-lhapdf`
+CC=gcc CXX=g++ FC=gfortran cmake ..
 make -j4
 ```
-
-> Adjust the `LHAPDF_ROOT` flag/variable name to match whatever your `CMakeLists.txt` actually expects — check `PYTHIA-RAD-CORR/CMakeLists.txt` for the exact variable if this doesn't work out of the box.
-
 The build output (executables, object files) lands in `build/` and is not tracked in git.
 
+Verify it worked, from build/:
+```bash
+././pythia6-eic < ../../STEERING/card_test_eAg
+```
 ---
 
 ## What was changed, and where
