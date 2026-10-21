@@ -21,6 +21,36 @@ name_N.txt  ──BuildTree──▶ ──hadd──▶ ──TreeToHepMC──
             (eic-smear)                (eic-smear)     (afterburner)                       (2. conversion, run_chain.sh)
 ```
 
+## Caveats for the eA samples
+
+**The struck nucleon is always a bound proton.** The cards set the PYTHIA
+target to a single nucleon (`A-Tar,Z-Tar = 1,1`). The nucleus enters only
+through the nuclear PDF (`MSTP(195)`, EPPS16), whose LHAPDF grids are
+bound-proton PDFs. This is the convention of the eA cards that ship with
+PYTHIA-RAD-CORR (`PYTHIA-RAD-CORR/STEER-FILES-eA/`). As a result:
+
+- Every event is e + bound proton in Ag or Au. There is no scattering off
+  neutrons (61 of 108 nucleons in Ag, 118 of 197 in Au), so isospin effects
+  are missing.
+- The ion beam in the event record is a proton with the per-nucleon beam
+  energy (e.g. `2212` at 115 GeV for eAg), not a nucleus.
+- There are no nuclear remnants: no spectator nucleons, evaporation
+  neutrons or fragments. Far-forward studies relying on them (ZDC, off-momentum
+  and Roman-pot nuclear tagging) can't use these samples for that.
+- Kinematics and hadronization are those of a single nucleon; nuclear effects
+  are limited to the modified PDFs. There is no nuclear-medium modification
+  of the final state.
+
+**Ag is A = 108.** EPPS16 provides one silver set, `EPPS16nlo_CT14nlo_Ag108`
+(A = 108, Z = 47), representing natural silver (about 52% ¹⁰⁷Ag and 48%
+¹⁰⁹Ag; average mass 107.87). There is no ¹⁰⁷Ag set. The nuclear modification
+varies slowly with A, so the difference from ¹⁰⁷Ag is far below the EPPS16
+uncertainties. For ePIC simulation with a ¹⁰⁷Ag beamline the mismatch has no
+practical effect, since no particle in these events carries nuclear rigidity.
+
+**Afterburner.** eAg 9x115 uses the eAu 100x9 beam-effects preset (no Ag
+preset exists); see [Afterburner presets](#afterburner-presets).
+
 ## Software used
 
 | Component | Version | Notes |
@@ -65,7 +95,8 @@ settings:
 - PDFs come from LHAPDF6 (`MSTP(51)=10042`, `MSTP(52)=2`). For eA the
   nuclear PDF is selected by `MSTP(195)` (= LHAPDF ID), which is the
   purpose of this repo. The target in PYTHIA is still a single nucleon
-  (`A-Tar,Z-Tar = 1,1`); the nucleus enters only through the nPDF.
+  (`A-Tar,Z-Tar = 1,1`); the nucleus enters only through the nPDF (see
+  [Caveats](#caveats-for-the-ea-samples)).
 - HERMES-style tune (`MSTP(17)=6`, `PARP(18)=0.17`, `PARJ(21)=0.40`, …),
   which differs from the `pythia6-eic` 1.3.0 campaign cards.
 - 5,000,000 events per run.

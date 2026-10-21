@@ -155,6 +155,8 @@ Verify it worked, from build/:
 for the ep 9x130, eAg 9x115 and eAu 9x100 samples: steering cards, generation,
 seeds, eic-smear conversion, afterburner presets, HepMC3 ROOT trees and software
 versions.
+Read its [caveats for the eA samples](production/README.md#caveats-for-the-ea-samples)
+before using them: the struck nucleon is always a bound proton.
 
 The published samples were generated with a gcc 8.3 build (CentOS 7 Fun4All
 stack on cvmfs), not in eic-shell. An eic-shell build of this repository
