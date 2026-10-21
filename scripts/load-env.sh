@@ -5,7 +5,7 @@
 # this script's own location.
 #
 # Usage (from inside eic-shell, at the repo root):
-#   source env/lhapdf-env.sh
+#   source scripts/load-env.sh
 
 # Resolve this script's real path (works even if sourced via a relative
 # path, and avoids relying on `pwd`, which can behave inconsistently

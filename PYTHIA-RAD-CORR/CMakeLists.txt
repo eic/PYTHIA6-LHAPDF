@@ -102,7 +102,11 @@ message (STATUS "CERNLIB flags:" ${CERNLIB_LIBRARIES} )
 include_directories(${CMAKE_SOURCE_DIR}/include)
 include_directories(${CMAKE_SOURCE_DIR}/include/pythia-radcorr)
 
-set(CMAKE_Fortran_FLAGS "-fno-second-underscore -fPIC")
+# -fno-automatic: PYTHIA6 relies on local variables keeping their values
+# between calls without SAVE. gfortran 8.3 happened to preserve them;
+# gfortran 14 (eic-shell) does not, which changes hadron pT spectra.
+# See validation/README.md.
+set(CMAKE_Fortran_FLAGS "-fno-second-underscore -fPIC -fno-automatic")
 # newer fortran compilers cause problems
 include(CheckFortranCompilerFlag)
 check_fortran_compiler_flag("-std=legacy" _std_legacy)
