@@ -176,19 +176,3 @@ Notes:
 
 Every one of the 30 conversion jobs (condor clusters 277240 ep, 277257 eAg,
 277258 eAu) logged `Events parsed and written: 5000000`.
-
-## 3. Published files
-
-The scheme follows the `pythia6-eic` campaign layout:
-
-```
-pythia6-lhapdf/1.0.0/ep_noradcor/9x130/q2_1to10/
-    pythia6-lhapdf_1.0.0_ep_noradcor_9x130_q2_1to10_run001.ab.hepmc3.tree.root
-pythia6-lhapdf/1.0.0/eAg_EPPS16_noradcor/9x115/q2_1to10/
-    pythia6-lhapdf_1.0.0_eAg_EPPS16_noradcor_9x115_q2_1to10_run001.ab.hepmc3.tree.root
-pythia6-lhapdf/1.0.0/eAu_EPPS16_noradcor/9x100/q2_1to10/
-    pythia6-lhapdf_1.0.0_eAu_EPPS16_noradcor_9x100_q2_1to10_run001.ab.hepmc3.tree.root
-```
-
-`run001`–`run010` are production runs 0–9. `1.0.0` is the `VERSION` in
-`PYTHIA-RAD-CORR/CMakeLists.txt`. The repository has no tag for it yet.
