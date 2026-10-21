@@ -28,7 +28,9 @@ PYTHIA6-LHAPDF/
 ├── PYTHIA-RAD-CORR/     # PYTHIA6 source, build system, and steering files (see nPDF fix note)
 ├── LHAPDF-6.5.5/        # LHAPDF source, patched in LHAGlue for the nPDF fix (see below)
 ├── pdfsets/             # A few bundled PDF sets for quick testing (see below)
-├── STEERING/            # Example input cards
+├── STEERING/            # Example input cards, incl. the production cards
+├── production/          # How the published samples were made: generation, eic-smear, afterburner
+├── validation/          # Reproducibility tests (why -fno-automatic is required) and scripts
 ├── install-lhapdf/      # LHAPDF build output (git-ignored, created when you build)
 ├── scripts/             # general setup scripts
 │   └── load-env.sh      # sets important paths (*required everytime you enter eic-shell*)
@@ -127,6 +129,12 @@ make -j4
 ```
 The build output (executables, object files) lands in `build/` and is not tracked in git.
 
+> **Compiler note.** `CMakeLists.txt` builds the Fortran with `-fno-automatic`.
+> Without it, a gfortran 14 build (eic-shell) runs fine but gives different
+> hadron pT spectra from the gcc 8.3 build that produced the published
+> samples. See [`validation/README.md`](validation/README.md). Keep the
+> flag if you change the build.
+
 Verify it worked, from build/:
 ```bash
 ./pythia6-eic < ../../STEERING/card_test_eAg
@@ -139,6 +147,24 @@ Verify it worked, from build/:
 |---|---|
 | `LHAPDF-6.5.5/src/LHAGlue.cc` (Lines 1167 to 1172) | Ignores PDF init calls using ID 3089 (CERNLIB's `structa` override) |
 | `PYTHIA-RAD-CORR/src/pythia/pypdfu.f` (Lines 385 to 395) | Set nPDF from steering-card input MSTP(195) |
+| `PYTHIA-RAD-CORR/CMakeLists.txt` | Builds the Fortran with `-fno-automatic`, needed for modern gfortran (see [`validation/`](validation/README.md)) |
+
+## Reproducing the published samples
+
+[`production/README.md`](production/README.md) describes the full chain used
+for the ep 9x130, eAg 9x115 and eAu 9x100 samples: steering cards, generation,
+seeds, eic-smear conversion, afterburner presets, HepMC3 ROOT trees and software
+versions.
+Read its [caveats for the eA samples](production/README.md#caveats-for-the-ea-samples)
+before using them: the struck nucleon is always a bound proton.
+
+The published samples were generated with a gcc 8.3 build (CentOS 7 Fun4All
+stack on cvmfs), not in eic-shell. An eic-shell build of this repository
+reproduces them statistically, with the `-fno-automatic` flag. The tests
+are in [`validation/README.md`](validation/README.md). The build also links
+CERNLIB from `/cvmfs/eic.opensciencegrid.org/gcc-8.3/opt/fun4all/core/cern64/pro`
+(set in `scripts/load-env.sh`), so it depends on that cvmfs area staying
+available.
 
 ## Source history
 
