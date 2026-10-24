@@ -148,6 +148,49 @@ Verify it worked, from build/:
 | `LHAPDF-6.5.5/src/LHAGlue.cc` (Lines 1167 to 1172) | Ignores PDF init calls using ID 3089 (CERNLIB's `structa` override) |
 | `PYTHIA-RAD-CORR/src/pythia/pypdfu.f` (Lines 385 to 395) | Set nPDF from steering-card input MSTP(195) |
 | `PYTHIA-RAD-CORR/CMakeLists.txt` | Builds the Fortran with `-fno-automatic`, needed for modern gfortran (see [`validation/`](validation/README.md)) |
+| `PYTHIA-RAD-CORR/src/pythia/pygaga.f` (Lines 351 to 354) | Applies the card's `xmin, xmax` line as a cut on Bjorken x (see below) |
+
+## Generating in a Bjorken-x window
+
+With `Pythia-Model = 1` (the production cards) events are generated in y and
+Q², and the card's `xmin, xmax` line used to have no effect on Bjorken x
+(it only set up the radiative-correction lookup table). `pygaga.f` now
+rejects and regenerates any phase-space point with x outside
+`[xmin, xmax)`. The cross section PYTHIA prints is then that of the window.
+
+The production cards keep `1e-04, 0.9`, which is wider than the x range
+their Q² and y limits allow, so they generate exactly as before.
+
+`STEERING/card_<system>_x<lo>to<hi>` are the production cards restricted to
+one x decade, sized for about 400 truth-level dihadron pairs per decade
+(Δφ correlation analysis, pair rates from the 1.0.0 samples, divided by
+0.985 for the events with 9 < Q² < 10 that the analysis drops). They differ
+from the production card only in the output name, the number of events per
+run and the x window:
+
+| Card | Events per run | Runs | Total |
+|---|---|---|---|
+| `card_ep_9x130_x1e-4to1e-3` | 3,800,000 | 2 | 7.6M |
+| `card_ep_9x130_x1e-3to1e-2` | 4,000,000 | 2 | 8.0M |
+| `card_ep_9x130_x1e-2to1e-1` | 4,650,000 | 4 | 18.6M |
+| `card_eAg_9x115_EPPS16_x1e-4to1e-3` | 5,000,000 | 1 | 5.0M |
+| `card_eAg_9x115_EPPS16_x1e-3to1e-2` | 2,850,000 | 2 | 5.7M |
+| `card_eAg_9x115_EPPS16_x1e-2to1e-1` | 4,870,000 | 3 | 14.6M |
+| `card_eAu_9x100_EPPS16_x1e-4to1e-3` | 3,100,000 | 2 | 6.2M |
+| `card_eAu_9x100_EPPS16_x1e-3to1e-2` | 2,750,000 | 2 | 5.5M |
+| `card_eAu_9x100_EPPS16_x1e-2to1e-1` | 4,870,000 | 3 | 14.6M |
+
+```bash
+production/run_generation.sh STEERING/card_ep_9x130_x1e-2to1e-1 0 1 2 3
+```
+
+Check: 200k events from `card_ep_9x130_x1e-3to1e-2` (eic-shell build,
+`-fno-automatic`) all have 1e-3 ≤ x < 1e-2, and PYTHIA gives σ = 0.2155 µb,
+against 0.4194 µb × 51.2% (the share of the 1.0.0 ep sample in that decade)
+= 0.2145 µb. After eic-smear and the afterburner they agree with the same
+decade filtered from the 1.0.0 ep run001 file in x, Q², y, W², charged
+multiplicity, scattered-electron energy and η, and π/K/p pT and η
+(χ² p-values 0.18 to 0.95).
 
 ## Reproducing the published samples
 
