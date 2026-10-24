@@ -11,7 +11,11 @@ simulation, and how to make them again.
 | eAu 9x100 | 9 × 100 | EPPS16nlo_CT14nlo_Au197 (901200) | 1 – 10 | 10 × 5,000,000 | 0.3024 |
 
 σ is PYTHIA's total cross-section normalisation, averaged over the 10 runs
-(the runs agree to about 0.03%).
+(the runs agree to about 0.03%). It is 1.0 / 1.5 / 1.7% higher than the events
+support; see [Known issue: cross section](#known-issue-cross-section).
+
+**1.1.0** is the same events split into three Bjorken-x decades; see
+[1.1.0: the 1.0.0 samples split into x decades](#110-the-100-samples-split-into-x-decades).
 
 The pipeline has two stages:
 
@@ -207,3 +211,113 @@ Notes:
 
 Every one of the 30 conversion jobs (condor clusters 277240 ep, 277257 eAg,
 277258 eAu) logged `Events parsed and written: 5000000`.
+
+## 1.1.0: the 1.0.0 samples split into x decades
+
+1.1.0 contains no new generation. Each 1.0.0 file is split by its `x` event
+attribute into x ∈ [1e-4,1e-3), [1e-3,1e-2) and [1e-2,1e-1). Every event is
+written unchanged to the file of its decade. Events with x outside [1e-4,1e-1)
+are dropped: 0.9% (ep), 1.7% (eAg) and 2.5% (eAu). The generator code is that of
+1.0.0, and the tag adds only the filter.
+
+The split serves analyses that need fixed statistics per x decade, such as the
+truth-level dihadron Δφ correlations (about 400 pairs per decade). It replaces
+random subsampling of 1.0.0. Generating directly in an x window with the
+Bjorken-x cut of PR #2 is not equivalent to 1.0.0 until issues #3 and #5 are
+fixed (PRs #4, #6).
+
+### Making the files
+
+```bash
+production/filter_1.0.0.sh ep_noradcor/9x130 1 /path/to/out     # runs 1 ... 10, likewise
+production/filter_1.0.0.sh eAg_EPPS16_noradcor/9x115 1 /path/to/out
+production/filter_1.0.0.sh eAu_EPPS16_noradcor/9x100 1 /path/to/out
+```
+
+Each call reads one 1.0.0 file over XRootD and runs `filter_decades.C` in the
+`eic_xl` container, about 40 minutes per run. Output:
+
+```
+<out>/<dataset>/q2_1to10/<decade>/pythia6-lhapdf_1.1.0_<dataset_>_q2_1to10_<decade>_run<NNN>.ab.hepmc3.tree.root
+<out>/<dataset>/q2_1to10/logs/run<NNN>.log
+```
+
+where `<decade>` is `x1e-4to1e-3`, `x1e-3to1e-2` or `x1e-2to1e-1`. Each log
+ends with the events kept per decade.
+
+### Contents
+
+All 10 runs per dataset. σ is the 1.0.0 value times the decade's share of the
+5 × 10⁷ events. The last column uses the event-consistent total (see below).
+
+| Dataset | Decade | Events (10 runs) | Share | σ (µb) | σ, event-consistent (µb) |
+|---|---|---|---|---|---|
+| ep 9x130 | x1e-4to1e-3 | 8,288,775 | 0.16578 | 0.06953 | 0.06883 |
+| | x1e-3to1e-2 | 25,852,913 | 0.51706 | 0.21685 | 0.21468 |
+| | x1e-2to1e-1 | 15,425,734 | 0.30851 | 0.12939 | 0.12810 |
+| eAg 9x115 | x1e-4to1e-3 | 5,373,078 | 0.10746 | 0.03372 | 0.03321 |
+| | x1e-3to1e-2 | 23,528,655 | 0.47057 | 0.14767 | 0.14541 |
+| | x1e-2to1e-1 | 20,245,406 | 0.40491 | 0.12706 | 0.12512 |
+| eAu 9x100 | x1e-4to1e-3 | 4,264,110 | 0.08528 | 0.02579 | 0.02535 |
+| | x1e-3to1e-2 | 22,509,970 | 0.45020 | 0.13614 | 0.13384 |
+| | x1e-2to1e-1 | 21,984,536 | 0.43969 | 0.13296 | 0.13072 |
+
+The trees store `GenCrossSection = 1`, as in 1.0.0, so σ is taken from this table.
+
+### Dihadron subset (first N events per decade)
+
+The Δφ analysis needs about 400 truth pairs per decade. That is N = 400 /
+(pairs per qualifying event) / 0.985 events, where 0.985 accounts for the
+events with 9 < Q² < 10 GeV² that the analysis drops. It takes the first N
+events in run order:
+
+| Dataset | Decade | N | Runs used | Expected pairs |
+|---|---|---|---|---|
+| ep 9x130 | x1e-4to1e-3 | 7.54M | 001–010 (81,289 of 830,064 in 010) | ~400 |
+| | x1e-3to1e-2 | 7.94M | 001–004 (184,269 of 2,585,251 in 004) | ~400 |
+| | x1e-2to1e-1 | 18.55M | all 10 runs, 15.43M (**short**) | ~330 |
+| eAg 9x115 | x1e-4to1e-3 | 4.98M | 001–010 (144,304 of 537,382 in 010) | ~400 |
+| | x1e-3to1e-2 | 5.68M | 001–003 (973,386 of 2,353,050 in 003) | ~400 |
+| | x1e-2to1e-1 | 14.51M | 001–008 (337,472 of 2,025,342 in 008) | ~400 |
+| eAu 9x100 | x1e-4to1e-3 | 6.11M | all 10 runs, 4.26M (**short**) | ~283 |
+| | x1e-3to1e-2 | 5.43M | 001–003 (928,682 of 2,251,614 in 003) | ~400 |
+| | x1e-2to1e-1 | 14.56M | 001–007 (1,369,823 of 2,199,669 in 007) | ~400 |
+
+The two short decades use all of 1.0.0. This was accepted rather than adding new runs.
+
+### Checks
+
+The files were made with an earlier copy of `filter_decades.C`. It applies the
+same selection and differs only in how the output names are passed. The
+outputs were then renamed to the scheme above. Checks, all passed:
+
+- **Counts:** each of the 30 runs read 5,000,000 events. The entries of all 90
+  trees equal the kept counts in the filter logs.
+- **x range:** every event (147,473,177 in total) has its x attribute inside its
+  file's decade.
+- **Events unchanged:** for run 001 of each dataset, every 1.0.0 event with x in
+  [1e-4,1e-1) was compared with the 1.1.0 event at the same position. All are
+  identical in attributes, particles (pid, status, momentum, mass) and vertices:
+  4,956,773 (ep), 4,914,792 (eAg), 4,875,896 (eAu). None differ, and no file
+  holds extra events.
+
+### Known issue: cross section
+
+PYTHIA's low-pT/hard (non-diffractive) cross section counts events that
+`PYREMN` fails to complete and that `PYEVNT` therefore regenerates (issue #5).
+This is standard PYTHIA 6.4 bookkeeping. The quoted σ is therefore higher than
+the events support, by 1.0% (ep), 1.5% (eAg) and 1.7% (eAu). The loss grows with
+x, so the effect per decade differs.
+
+- Per-event observables are not affected; they do not use σ.
+- For absolute yields, use the event-consistent values (ep 0.4152, eAg 0.3090,
+  eAu 0.2973 µb in total, or the last column above).
+- The fix (PR #6) changes the quoted σ only; events stay byte-identical. It will
+  come with the next physics version, so that 1.1.0 stays consistent with the
+  1.0.0 records.
+
+The process-95 rate in 1.0.0 also depends on the kinematics of earlier
+attempts in the run (issue #3, PR #4). This is a physics change for a later
+version. For the dihadron analysis it shifts pairs per event by 0.2–0.6%,
+well below its statistical precision.
+
