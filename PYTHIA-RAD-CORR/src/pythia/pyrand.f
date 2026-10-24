@@ -1244,6 +1244,9 @@ C...Multiple interactions: choose impact parameter (if not already done).
       IF(MINT(82).EQ.1.AND.MSUB(95).EQ.1) THEN
         IF(ISUB.LE.90.OR.ISUB.GE.95) NGEN(95,1)=NGEN(95,1)+MINT(143)
         IF(ISUB.LE.90.OR.ISUB.GE.96) NGEN(96,2)=NGEN(96,2)+1
+C...Count accepted low-pT and hard (still ISUB 96 here) events, so the
+C...cross-section rescaled in PYDOCU can drop events lost in PYEVNT.
+        IF(ISUB.EQ.95.OR.ISUB.EQ.96) NGEN(97,2)=NGEN(97,2)+1
       ENDIF
       IF(ISUB.LE.90.OR.ISUB.GE.96) MINT(31)=MINT(31)+1
  
