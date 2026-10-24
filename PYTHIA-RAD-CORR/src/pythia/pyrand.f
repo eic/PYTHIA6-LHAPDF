@@ -184,7 +184,12 @@ C...to avoid doublecounting  with DIS.
       ENDIF
  
 C...Set up for multiple interactions (may include impact parameter).
+C...PYMULT(2)/PYMIGN(2) read the longitudinal-photon factors
+C...VINT(315), VINT(316); PYSIGH has not yet been called at this
+C...phase-space point, so set them here for ISUB 96. No hard scale
+C...exists yet: MSTP(17)=1,2 get the pTmin scale.
       IF(INMULT.EQ.1) THEN
+        CALL PYGALF(96,VINT(154)**2)
         IF(MINT(35).LE.1) CALL PYMULT(2)
         IF(MINT(35).GE.2) CALL PYMIGN(2)
       ENDIF
