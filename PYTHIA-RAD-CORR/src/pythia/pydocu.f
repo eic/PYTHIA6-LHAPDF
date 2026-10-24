@@ -54,6 +54,11 @@ C...Rescale to known low-pT cross-section for standard QCD processes.
         XSECH=XSEC(11,3)+XSEC(12,3)+XSEC(13,3)+XSEC(28,3)+XSEC(53,3)+
      &  XSEC(68,3)+XSEC(95,3)
         XSECW=XSEC(97,2)/MAX(1D0,DBLE(NGEN(97,1)))
+C...Keep only the share of accepted events that survived PYEVNT (e.g.
+C...PYREMN failures), as NGEN(I,3)/NGEN(I,2) does for other subprocesses.
+        IF(NGEN(97,2).GT.0) XSECW=XSECW*DBLE(NGEN(11,3)+NGEN(12,3)+
+     &  NGEN(13,3)+NGEN(28,3)+NGEN(53,3)+NGEN(68,3)+NGEN(95,3))/
+     &  DBLE(NGEN(97,2))
         IF(XSECH.GT.1D-20.AND.XSECW.GT.1D-20) THEN
           FAC=XSECW/XSECH
           XSEC(11,3)=FAC*XSEC(11,3)
