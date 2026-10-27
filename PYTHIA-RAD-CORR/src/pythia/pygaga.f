@@ -348,6 +348,10 @@ C... check x and Q2 go toghether
             if (genQ2.gt.(2.*gennu*massp)) then
                GOTO 121
             endif
+C... Bjorken-x window from the steering card (xmin, xmax line)
+            if ((genx.lt.mcSet_XMin).or.(genx.ge.mcSet_XMax)) then
+               GOTO 121
+            endif
 C            temp = ((genQ2-minq2)/(2D0*ebeamEnucl*geneprim))-1D0
             temp=(genQ2/(2.*ebeamEnucl*geneprim))-1.
             if ((temp.le.1.00).and.(temp.ge.-1.0)) then
